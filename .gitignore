@@ -1,0 +1,17 @@
+# Virtual environment
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Secrets: database passwords and API keys go in .env, never in Git
+.env
+
+# Test and tool caches
+.pytest_cache/
+
+# Editor and operating system files
+.vscode/
+Thumbs.db
+*:Zone.Identifier
