@@ -1,10 +1,7 @@
-"""Terminal interface: ask a question, review the model's interpretation and SQL, then choose to run it.
-
-Run from the project folder: python -m scripts.ask
-"""
-from nlsql_assistant.db import run_query
+from nlsql_assistant.db import QueryFailed, run_query
 from nlsql_assistant.generate_sql import generate_sql
 from nlsql_assistant.interpret import interpret
+from nlsql_assistant.validate import validate_sql
 
 question = input("Question: ").strip()
 interpretation, _ = interpret(question)
@@ -36,12 +33,22 @@ if interpretation.needs_clarification:
 generated, _ = generate_sql(question, interpretation)
 print(f"\nProposed SQL:\n{generated.sql}\n\n{generated.explanation}")
 
+check = validate_sql(generated.sql)
+if not check.allowed:
+    print("\nBlocked by the validator, so this query will not run:")
+    for error in check.errors:
+        print(f"  - {error}")
+    raise SystemExit
+
 if input("\nRun this query? [y/N] ").strip().lower() != "y":
     raise SystemExit("Not run.")
 
-columns, rows, truncated = run_query(generated.sql)
+try:
+    columns, rows, truncated = run_query(generated.sql)
+except QueryFailed as error:
+    raise SystemExit(f"\n{error}")
 print("\n" + " | ".join(columns))
 for row in rows:
     print(" | ".join(str(value) for value in row))
 if truncated:
-    print("(results truncated)")
+    print(f"(showing the first {len(rows)} rows only)")
