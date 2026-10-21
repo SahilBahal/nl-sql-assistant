@@ -44,8 +44,16 @@ def build_system_prompt():
             f"<examples>\n{examples}\n</examples>")
 
 
-def generate_sql(question, interpretation):
-    """Return (GeneratedSQL, usage) for a question and its Interpretation."""
+def generate_sql(question, interpretation, rejected_sql=None, problems=()):
+    """Return (GeneratedSQL, usage) for a question and its Interpretation.
+
+    Pass rejected_sql and problems to ask for a corrected query after the checks found issues.
+    """
     message = (f"Question: {question}\n\n"
                f"Interpretation:\n{interpretation.model_dump_json(indent=2)}")
+    if rejected_sql:
+        problem_lines = "\n".join(f"- {problem}" for problem in problems)
+        message += (f"\n\nA previous attempt was rejected by automatic checks.\n"
+                    f"Rejected SQL:\n{rejected_sql}\n\nProblems found:\n{problem_lines}\n\n"
+                    f"Write a corrected query that fixes every problem and still implements the interpretation.")
     return ask_structured(build_system_prompt(), message, GeneratedSQL)

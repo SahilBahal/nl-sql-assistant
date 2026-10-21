@@ -2,6 +2,7 @@ from nlsql_assistant.db import QueryFailed, run_query
 from nlsql_assistant.generate_sql import generate_sql
 from nlsql_assistant.interpret import interpret
 from nlsql_assistant.validate import validate_sql
+from nlsql_assistant.semantic import check_semantics
 
 question = input("Question: ").strip()
 interpretation, _ = interpret(question)
@@ -31,14 +32,31 @@ if interpretation.needs_clarification:
     print("  (still ambiguous after your answer; using the best guess above)")
 
 generated, _ = generate_sql(question, interpretation)
-print(f"\nProposed SQL:\n{generated.sql}\n\n{generated.explanation}")
+for attempt in (1, 2):
+    print(f"\nProposed SQL:\n{generated.sql}\n\n{generated.explanation}")
+    check = validate_sql(generated.sql)
+    semantic = check_semantics(generated.sql, interpretation) if check.allowed else None
+    problems = check.errors + (semantic.issues if semantic else [])
+    if not problems or attempt == 2:
+        break
+    print("\nThe checks found problems, so the model gets one chance to fix them:")
+    for problem in problems:
+        print(f"  - {problem}")
+    generated, _ = generate_sql(question, interpretation, generated.sql, problems)
 
-check = validate_sql(generated.sql)
 if not check.allowed:
     print("\nBlocked by the validator, so this query will not run:")
     for error in check.errors:
         print(f"  - {error}")
     raise SystemExit
+
+if semantic.passed:
+    print("\nSemantic check: the SQL matches the interpretation.")
+else:
+    print("\nWARNING: the SQL may not answer the question as interpreted:")
+    for issue in semantic.issues:
+        print(f"  - {issue}")
+
 
 if input("\nRun this query? [y/N] ").strip().lower() != "y":
     raise SystemExit("Not run.")
