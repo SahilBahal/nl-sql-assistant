@@ -1,0 +1,22 @@
+[
+  {
+    "id": "q01",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "What was our net booked value in Q3 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT sum(amount) AS net_booked_value FROM bookings WHERE status = 'active' AND booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 100,
+    "confidence_level": "High",
+    "rows": [
+      [
+        52060.0
+      ]
+    ],
+    "cost": 0.0487
+  }
+]

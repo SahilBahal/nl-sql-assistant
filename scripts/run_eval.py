@@ -17,6 +17,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from pathlib import Path
 
+from nlsql_assistant import llm
 from nlsql_assistant.db import run_query
 from nlsql_assistant.pipeline import answer_question
 
@@ -79,7 +80,7 @@ def run_case(case):
 
 
 def print_report(results):
-    print(f"\n{'=' * 60}\nDatabase: {os.environ['POSTGRES_DB']}\nPassed {sum(r['passed'] for r in results)} of {len(results)}")
+    print(f"\n{'=' * 60}\nDatabase: {os.environ['POSTGRES_DB']}   Provider: {llm.PROVIDER}   Model: {llm.MODEL}\nPassed {sum(r['passed'] for r in results)} of {len(results)}")
     by_category = defaultdict(list)
     for r in results:
         by_category[r["category"]].append(r["passed"])
@@ -119,7 +120,7 @@ def main():
         results.append(result)
         print(f"{'PASS' if result['passed'] else 'FAIL'}  {case['id']}  {result['status']:20} {case['question']}")
 
-    out_file = EVALS_DIR / "results" / f"run_{os.environ['POSTGRES_DB']}_{datetime.now():%Y%m%d_%H%M%S}.json"
+    out_file = EVALS_DIR / "results" / f"run_{os.environ['POSTGRES_DB']}_{llm.PROVIDER}_{llm.MODEL.split('.')[-1].replace(':', '-')}_{datetime.now():%Y%m%d_%H%M%S}.json"
     out_file.parent.mkdir(exist_ok=True)
     out_file.write_text(json.dumps(results, indent=2))
     print_report(results)

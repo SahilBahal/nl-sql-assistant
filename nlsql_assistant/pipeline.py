@@ -12,7 +12,7 @@ from nlsql_assistant.interpret import interpret
 from nlsql_assistant.semantic import check_semantics
 from nlsql_assistant.validate import validate_sql
 
-INPUT_PRICE, OUTPUT_PRICE = 4 / 1_000_000, 20 / 1_000_000  # dollars per token
+from nlsql_assistant.llm import INPUT_PRICE, OUTPUT_PRICE
 
 
 @dataclass
