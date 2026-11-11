@@ -15,7 +15,7 @@ SCHEMA_FILE = Path(__file__).resolve().parent.parent / "db" / "schema.sql"
 ALLOWED_FUNCTIONS = {
     exp.Sum, exp.Count, exp.Avg, exp.Min, exp.Max, exp.Round, exp.Abs,
     exp.Coalesce, exp.Nullif, exp.Greatest, exp.Least,
-    exp.Case, exp.If, exp.Cast, exp.TryCast, exp.Extract, exp.DateTrunc,
+    exp.Case, exp.If, exp.Cast, exp.TryCast, exp.Extract, exp.DateTrunc, exp.TimestampTrunc,
 }
 
 # Statement types that change data or the database. Rejected anywhere in the query, including inside a CTE.

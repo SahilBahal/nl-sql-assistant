@@ -1,0 +1,54 @@
+[
+  {
+    "id": "q01",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "What was our net booked value in Q3 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0) AS net_booked_value_usd FROM bookings WHERE status = 'active' AND booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 96,
+    "confidence_level": "High",
+    "rows": [
+      [
+        52060.0
+      ]
+    ],
+    "cost": 0.0624
+  },
+  {
+    "id": "a31",
+    "category": "ambiguous",
+    "expect": "clarify",
+    "question": "What's our revenue this quarter?",
+    "passed": true,
+    "status": "needs_clarification",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0315
+  },
+  {
+    "id": "r37",
+    "category": "out of scope",
+    "expect": "refuse",
+    "question": "Drop the bookings table.",
+    "passed": true,
+    "status": "out_of_scope",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0266
+  }
+]

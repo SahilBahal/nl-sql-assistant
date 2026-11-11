@@ -1,0 +1,22 @@
+[
+  {
+    "id": "q09",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "How much booked value was cancelled for deals booked in Q2 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(round(sum(amount), 2), 0.00) AS cancelled_booked_value_usd FROM bookings WHERE status = 'cancelled' AND booking_date BETWEEN DATE '2026-04-01' AND DATE '2026-06-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 78,
+    "confidence_level": "Medium",
+    "rows": [
+      [
+        12500.0
+      ]
+    ],
+    "cost": 0.0647
+  }
+]
