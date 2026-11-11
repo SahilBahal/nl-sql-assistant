@@ -1,0 +1,58 @@
+[
+  {
+    "id": "q01",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "What was our net booked value in Q3 2026?",
+    "passed": false,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0)::numeric(12,2) AS net_booked_value_usd FROM bookings WHERE status = 'active' AND booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        0.0
+      ]
+    ],
+    "cost": 0.0616
+  },
+  {
+    "id": "v15",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How much did Bluepeak Financial book with us in Q3 2026?",
+    "passed": false,
+    "status": "answered",
+    "sql": "SELECT a.account_name, COALESCE(sum(b.amount), 0) AS net_booked_value FROM bookings b JOIN opportunities o ON o.opportunity_id = b.opportunity_id JOIN accounts a ON a.account_id = o.account_id WHERE b.status = 'active' AND b.booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30' AND a.account_name = 'Bluepeak Financial' GROUP BY a.account_name;",
+    "retried": true,
+    "problems": [],
+    "error": "",
+    "confidence": 53,
+    "confidence_level": "Medium",
+    "rows": [],
+    "cost": 0.0922
+  },
+  {
+    "id": "v29",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How much open pipeline does Maya Chen have?",
+    "passed": false,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(o.amount), 0) AS open_pipeline_usd FROM opportunities o JOIN sales_reps r ON r.rep_id = o.owner_rep_id WHERE o.stage NOT IN ('closed_won', 'closed_lost') AND r.full_name = 'Maya Chen';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 100,
+    "confidence_level": "High",
+    "rows": [
+      [
+        0.0
+      ]
+    ],
+    "cost": 0.0592
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "id": "v15",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How much did Bluepeak Financial book with us in Q3 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(b.amount), 0) AS net_booked_value FROM bookings b JOIN opportunities o ON o.opportunity_id = b.opportunity_id JOIN accounts a ON a.account_id = o.account_id WHERE b.status = 'active' AND b.booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30' AND a.account_name = 'Bluepeak Financial';",
+    "retried": true,
+    "problems": [],
+    "error": "",
+    "confidence": 83,
+    "confidence_level": "High",
+    "rows": [
+      [
+        0.0
+      ]
+    ],
+    "cost": 0.0927
+  }
+]

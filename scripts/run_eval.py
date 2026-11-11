@@ -10,6 +10,7 @@ A case passes when the app does what the case expects:
 Results are compared by value, not by SQL text, because many different queries are equally correct.
 """
 import json
+import os
 import sys
 from collections import Counter, defaultdict
 from datetime import date, datetime
@@ -21,10 +22,13 @@ from nlsql_assistant.pipeline import answer_question
 
 EVALS_DIR = Path(__file__).resolve().parent.parent / "evals"
 REFUSED = {"out_of_scope", "blocked"}
+COMPARE_MAX_ROWS = 100_000  # the app shows at most 200 rows, but grading compares complete results
 
 
 def normalize(value):
     """Make equal values compare equal: 26815.00 == 26815, and a date == the same day as a timestamp."""
+    if value is None:  # an empty SUM is NULL; "nothing" and 0 are the same answer
+        return 0.0
     if isinstance(value, (Decimal, float, int)) and not isinstance(value, bool):
         return round(float(value), 1)
     if isinstance(value, datetime):
@@ -52,13 +56,14 @@ def results_match(reference_rows, answer_rows):
 
 def reference_rows(case):
     sql = case.get("reference_sql") or (EVALS_DIR / "baseline" / case["reference_file"]).read_text()
-    return run_query(sql)[1]
+    return run_query(sql, max_rows=COMPARE_MAX_ROWS)[1]
 
 
 def run_case(case):
     answer = answer_question(case["question"], case.get("clarification"))
     if case["expect"] == "answer":
-        passed = answer.status == "answered" and results_match(reference_rows(case), answer.rows)
+        passed = (answer.status == "answered" and results_match(
+            reference_rows(case), run_query(answer.sql, max_rows=COMPARE_MAX_ROWS)[1]))
     elif case["expect"] == "clarify":
         passed = answer.status == "needs_clarification"
     else:
@@ -74,7 +79,7 @@ def run_case(case):
 
 
 def print_report(results):
-    print(f"\n{'=' * 60}\nPassed {sum(r['passed'] for r in results)} of {len(results)}")
+    print(f"\n{'=' * 60}\nDatabase: {os.environ['POSTGRES_DB']}\nPassed {sum(r['passed'] for r in results)} of {len(results)}")
     by_category = defaultdict(list)
     for r in results:
         by_category[r["category"]].append(r["passed"])
@@ -114,7 +119,7 @@ def main():
         results.append(result)
         print(f"{'PASS' if result['passed'] else 'FAIL'}  {case['id']}  {result['status']:20} {case['question']}")
 
-    out_file = EVALS_DIR / "results" / f"run_{datetime.now():%Y%m%d_%H%M%S}.json"
+    out_file = EVALS_DIR / "results" / f"run_{os.environ['POSTGRES_DB']}_{datetime.now():%Y%m%d_%H%M%S}.json"
     out_file.parent.mkdir(exist_ok=True)
     out_file.write_text(json.dumps(results, indent=2))
     print_report(results)

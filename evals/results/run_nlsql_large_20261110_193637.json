@@ -1,0 +1,18 @@
+[
+  {
+    "id": "v25",
+    "category": "variation",
+    "expect": "answer",
+    "question": "Who were our top 3 clients by net booked value in Q3 2026?",
+    "passed": false,
+    "status": "needs_clarification",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0356
+  }
+]

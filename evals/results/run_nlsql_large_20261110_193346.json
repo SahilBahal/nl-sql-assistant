@@ -1,0 +1,1332 @@
+[
+  {
+    "id": "q01",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "What was our net booked value in Q3 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0) AS net_booked_value_usd FROM bookings WHERE status = 'active' AND booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        67596296.6
+      ]
+    ],
+    "cost": 0.063
+  },
+  {
+    "id": "q02",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "How much is booked for Q3 2026 delivery?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0) AS net_booked_value_usd FROM bookings WHERE status = 'active' AND delivery_month BETWEEN DATE '2026-07-01' AND DATE '2026-09-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        76109034.0
+      ]
+    ],
+    "cost": 0.0574
+  },
+  {
+    "id": "q03",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "How much open pipeline does each salesperson own?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT r.full_name AS salesperson, sum(o.amount) AS open_pipeline_usd FROM opportunities o JOIN sales_reps r ON r.rep_id = o.owner_rep_id WHERE o.stage NOT IN ('closed_won', 'closed_lost') GROUP BY r.full_name ORDER BY open_pipeline_usd DESC;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Reese Mendez",
+        6270730.0
+      ],
+      [
+        "Avery Silva",
+        5699770.0
+      ],
+      [
+        "Devon Garcia",
+        5675570.0
+      ],
+      [
+        "Taylor Cohen",
+        5640980.0
+      ],
+      [
+        "Logan Larsen",
+        5494680.0
+      ],
+      [
+        "Quinn Larsen",
+        5391500.0
+      ],
+      [
+        "Elliot Silva",
+        5246150.0
+      ],
+      [
+        "Kendall Fischer",
+        5202870.0
+      ],
+      [
+        "Casey Murphy",
+        5175430.0
+      ],
+      [
+        "Maya Chen",
+        5136870.0
+      ]
+    ],
+    "cost": 0.0591
+  },
+  {
+    "id": "q04",
+    "category": "prompt example",
+    "expect": "answer",
+    "question": "Which clients spent less this quarter than last quarter?",
+    "passed": true,
+    "status": "answered",
+    "sql": "WITH q AS (SELECT o.account_id, sum(b.amount) FILTER (WHERE b.booking_date BETWEEN DATE '2026-04-01' AND DATE '2026-06-30') AS q2, sum(b.amount) FILTER (WHERE b.booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30') AS q3 FROM bookings b JOIN opportunities o ON o.opportunity_id = b.opportunity_id WHERE b.status = 'active' AND b.booking_date BETWEEN DATE '2026-04-01' AND DATE '2026-09-30' GROUP BY o.account_id) SELECT a.account_name, COALESCE(q.q2, 0) AS last_quarter_booked, COALESCE(q.q3, 0) AS this_quarter_booked, COALESCE(q.q3, 0) - COALESCE(q.q2, 0) AS change FROM q JOIN accounts a ON a.account_id = q.account_id WHERE COALESCE(q.q3, 0) < COALESCE(q.q2, 0) ORDER BY change;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 91,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Evergreen North Health",
+        245245.4,
+        0.0,
+        -245245.4
+      ],
+      [
+        "Urban Coastal Home",
+        253221.5,
+        16174.9,
+        -237046.6
+      ],
+      [
+        "Evergreen Stone Travel",
+        236822.2,
+        0.0,
+        -236822.2
+      ],
+      [
+        "Coastal River Supply",
+        232963.8,
+        0.0,
+        -232963.8
+      ],
+      [
+        "Evergreen Blue Supply",
+        221376.0,
+        0.0,
+        -221376.0
+      ],
+      [
+        "Harbor Summit Capital 584",
+        247450.9,
+        38816.7,
+        -208634.2
+      ],
+      [
+        "North Green Foods",
+        205919.1,
+        0.0,
+        -205919.1
+      ],
+      [
+        "Harbor North Supply",
+        265703.1,
+        64115.2,
+        -201588.0
+      ],
+      [
+        "Urban South Works 518",
+        192460.2,
+        0.0,
+        -192460.2
+      ],
+      [
+        "Coastal Stone Home",
+        191526.6,
+        0.0,
+        -191526.6
+      ]
+    ],
+    "cost": 0.0669
+  },
+  {
+    "id": "q05",
+    "category": "prompt example",
+    "expect": "answer",
+    "question": "Which advertising products have the most available inventory next month?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT p.product_name, i.total_placements, COALESCE(b.booked, 0) AS booked_placements, i.total_placements - COALESCE(b.booked, 0) AS available_placements FROM inventory i JOIN products p ON p.product_id = i.product_id LEFT JOIN (SELECT product_id, delivery_month, sum(placements) AS booked FROM bookings WHERE status = 'active' GROUP BY product_id, delivery_month) b ON b.product_id = i.product_id AND b.delivery_month = i.inventory_month WHERE i.inventory_month = DATE '2026-10-01' ORDER BY available_placements DESC;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 96,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Podcast Host-Read Spot",
+        2838.0,
+        1081.0,
+        1757.0
+      ],
+      [
+        "Website Display Package",
+        2520.0,
+        999.0,
+        1521.0
+      ],
+      [
+        "Social Story Bundle",
+        2471.0,
+        971.0,
+        1500.0
+      ],
+      [
+        "Podcast Series Sponsorship",
+        2086.0,
+        1029.0,
+        1057.0
+      ],
+      [
+        "Weekend Newsletter Feature",
+        2054.0,
+        1078.0,
+        976.0
+      ],
+      [
+        "Homepage Takeover",
+        1879.0,
+        989.0,
+        890.0
+      ],
+      [
+        "Video Pre-Roll",
+        1807.0,
+        966.0,
+        841.0
+      ],
+      [
+        "Daily Newsletter Sponsorship",
+        1512.0,
+        1022.0,
+        490.0
+      ]
+    ],
+    "cost": 0.062
+  },
+  {
+    "id": "q06",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "Which opportunities have had no activity for more than 30 days?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT opportunity_id, opportunity_name, stage, amount, last_activity_date FROM opportunities WHERE stage NOT IN ('closed_won', 'closed_lost') AND last_activity_date < DATE '2026-09-30' - 30 ORDER BY last_activity_date;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 93,
+    "confidence_level": "High",
+    "rows": [
+      [
+        41865.0,
+        "Urban Urban Capital - Jan 2025",
+        "prospecting",
+        30370.0,
+        "2025-01-13"
+      ],
+      [
+        18962.0,
+        "Prairie Iron Foods - Jan 2025",
+        "negotiation",
+        47640.0,
+        "2025-01-13"
+      ],
+      [
+        6228.0,
+        "River South Health - Jan 2025",
+        "qualification",
+        19860.0,
+        "2025-01-16"
+      ],
+      [
+        43232.0,
+        "Prairie Harbor Studios - Jan 2025",
+        "prospecting",
+        57930.0,
+        "2025-01-24"
+      ],
+      [
+        36509.0,
+        "Prairie River Media - Jan 2025",
+        "qualification",
+        27620.0,
+        "2025-01-24"
+      ],
+      [
+        46640.0,
+        "Harbor Iron Outfitters - Jan 2025",
+        "qualification",
+        7380.0,
+        "2025-01-24"
+      ],
+      [
+        34003.0,
+        "Coastal Cedar Fitness 1296 - Jan 2025",
+        "proposal",
+        41150.0,
+        "2025-01-25"
+      ],
+      [
+        45694.0,
+        "Summit Blue Partners - Jan 2025",
+        "qualification",
+        44430.0,
+        "2025-01-27"
+      ],
+      [
+        35986.0,
+        "Harbor Blue Outfitters - Jan 2025",
+        "prospecting",
+        30600.0,
+        "2025-01-27"
+      ],
+      [
+        13677.0,
+        "North North Goods - Jan 2025",
+        "prospecting",
+        56540.0,
+        "2025-01-28"
+      ]
+    ],
+    "cost": 0.0617
+  },
+  {
+    "id": "q07",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "What was the sell-through rate by product in August 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT p.product_name, i.total_placements, COALESCE(b.booked, 0) AS booked_placements, round(100.0 * COALESCE(b.booked, 0) / NULLIF(i.total_placements, 0), 1) AS sell_through_pct FROM inventory i JOIN products p ON p.product_id = i.product_id LEFT JOIN (SELECT product_id, delivery_month, sum(placements) AS booked FROM bookings WHERE status = 'active' GROUP BY product_id, delivery_month) b ON b.product_id = i.product_id AND b.delivery_month = i.inventory_month WHERE i.inventory_month = DATE '2026-08-01' ORDER BY sell_through_pct DESC NULLS LAST;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 96,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Website Display Package",
+        1794.0,
+        1183.0,
+        65.9
+      ],
+      [
+        "Video Pre-Roll",
+        1849.0,
+        1147.0,
+        62.0
+      ],
+      [
+        "Daily Newsletter Sponsorship",
+        1972.0,
+        1141.0,
+        57.9
+      ],
+      [
+        "Homepage Takeover",
+        2408.0,
+        1116.0,
+        46.3
+      ],
+      [
+        "Podcast Series Sponsorship",
+        2567.0,
+        1153.0,
+        44.9
+      ],
+      [
+        "Weekend Newsletter Feature",
+        2845.0,
+        1214.0,
+        42.7
+      ],
+      [
+        "Podcast Host-Read Spot",
+        2904.0,
+        1147.0,
+        39.5
+      ],
+      [
+        "Social Story Bundle",
+        3094.0,
+        1142.0,
+        36.9
+      ]
+    ],
+    "cost": 0.0625
+  },
+  {
+    "id": "q08",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "What is booked for Q3 2026 delivery, by product?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT p.product_name, sum(b.amount) AS net_booked_value_usd FROM bookings b JOIN products p ON p.product_id = b.product_id WHERE b.status = 'active' AND b.delivery_month BETWEEN DATE '2026-07-01' AND DATE '2026-09-30' GROUP BY p.product_name ORDER BY net_booked_value_usd DESC;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 94,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Podcast Series Sponsorship",
+        25758802.8
+      ],
+      [
+        "Homepage Takeover",
+        14371216.9
+      ],
+      [
+        "Daily Newsletter Sponsorship",
+        12547575.8
+      ],
+      [
+        "Weekend Newsletter Feature",
+        8634079.7
+      ],
+      [
+        "Podcast Host-Read Spot",
+        7192035.8
+      ],
+      [
+        "Video Pre-Roll",
+        3484277.4
+      ],
+      [
+        "Website Display Package",
+        2400490.4
+      ],
+      [
+        "Social Story Bundle",
+        1720555.3
+      ]
+    ],
+    "cost": 0.0613
+  },
+  {
+    "id": "q09",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "How much booked value was cancelled for deals booked in Q2 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0) AS cancelled_booked_value FROM bookings WHERE status = 'cancelled' AND booking_date BETWEEN DATE '2026-04-01' AND DATE '2026-06-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 78,
+    "confidence_level": "Medium",
+    "rows": [
+      [
+        3850238.4
+      ]
+    ],
+    "cost": 0.0642
+  },
+  {
+    "id": "q10",
+    "category": "baseline",
+    "expect": "answer",
+    "question": "What was net booked value by client industry in Q3 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT a.industry AS client_industry, round(sum(b.amount), 2) AS net_booked_value_usd FROM bookings b JOIN opportunities o ON o.opportunity_id = b.opportunity_id JOIN accounts a ON a.account_id = o.account_id WHERE b.status = 'active' AND b.booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30' GROUP BY a.industry ORDER BY net_booked_value_usd DESC;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 96,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Retail",
+        10535822.3
+      ],
+      [
+        "Media",
+        10374494.9
+      ],
+      [
+        "Education",
+        10029597.1
+      ],
+      [
+        "Healthcare",
+        9490180.6
+      ],
+      [
+        "Finance",
+        9389352.9
+      ],
+      [
+        "Travel",
+        9167413.8
+      ],
+      [
+        "Technology",
+        8609435.1
+      ]
+    ],
+    "cost": 0.0653
+  },
+  {
+    "id": "v11",
+    "category": "variation",
+    "expect": "answer",
+    "question": "What did we book last quarter?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0) AS net_booked_value_usd FROM bookings WHERE status = 'active' AND booking_date BETWEEN DATE '2026-04-01' AND DATE '2026-06-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        80378525.9
+      ]
+    ],
+    "cost": 0.0574
+  },
+  {
+    "id": "v12",
+    "category": "variation",
+    "expect": "answer",
+    "question": "Net booked value by sales rep for Q3 2026, booked date basis",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT r.full_name AS sales_rep, sum(b.amount) AS net_booked_value FROM bookings b JOIN opportunities o ON o.opportunity_id = b.opportunity_id JOIN sales_reps r ON r.rep_id = o.owner_rep_id WHERE b.status = 'active' AND b.booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30' GROUP BY r.full_name ORDER BY net_booked_value DESC;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 94,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Elliot Okafor",
+        2150210.7
+      ],
+      [
+        "Avery Kim",
+        2072627.1
+      ],
+      [
+        "Taylor Cohen",
+        2056555.2
+      ],
+      [
+        "Emerson Mendez",
+        1989214.4
+      ],
+      [
+        "Avery Garcia",
+        1833594.6
+      ],
+      [
+        "Logan Larsen",
+        1830667.8
+      ],
+      [
+        "Avery Silva",
+        1820596.4
+      ],
+      [
+        "Skyler Brooks",
+        1809046.5
+      ],
+      [
+        "Casey Ahmed",
+        1806567.1
+      ],
+      [
+        "Reese Haddad",
+        1778127.7
+      ]
+    ],
+    "cost": 0.0664
+  },
+  {
+    "id": "v13",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How much active booked value is scheduled to deliver in August 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0) AS net_booked_value_aug_2026_delivery FROM bookings WHERE status = 'active' AND delivery_month BETWEEN DATE '2026-08-01' AND DATE '2026-08-31';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        26044773.3
+      ]
+    ],
+    "cost": 0.0574
+  },
+  {
+    "id": "v14",
+    "category": "variation",
+    "expect": "answer",
+    "question": "Break down Q3 2026 delivery bookings by channel.",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT p.channel, sum(b.amount) AS net_booked_value_usd FROM bookings b JOIN products p ON p.product_id = b.product_id WHERE b.status = 'active' AND b.delivery_month BETWEEN DATE '2026-07-01' AND DATE '2026-09-30' GROUP BY p.channel ORDER BY net_booked_value_usd DESC;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "podcast",
+        32950838.6
+      ],
+      [
+        "newsletter",
+        21181655.5
+      ],
+      [
+        "web",
+        16771707.3
+      ],
+      [
+        "video",
+        3484277.4
+      ],
+      [
+        "social",
+        1720555.3
+      ]
+    ],
+    "cost": 0.0606
+  },
+  {
+    "id": "v15",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How much did Bluepeak Financial book with us in Q3 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(b.amount), 0) AS net_booked_value_usd FROM bookings b JOIN opportunities o ON o.opportunity_id = b.opportunity_id JOIN accounts a ON a.account_id = o.account_id WHERE b.status = 'active' AND a.account_name = 'Bluepeak Financial' AND b.booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 96,
+    "confidence_level": "High",
+    "rows": [
+      [
+        0.0
+      ]
+    ],
+    "cost": 0.0607
+  },
+  {
+    "id": "v16",
+    "category": "variation",
+    "expect": "answer",
+    "question": "Show open pipeline value by stage.",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT o.stage, sum(o.amount) AS open_pipeline_value FROM opportunities o WHERE o.stage NOT IN ('closed_won', 'closed_lost') GROUP BY o.stage ORDER BY CASE o.stage WHEN 'prospecting' THEN 1 WHEN 'qualification' THEN 2 WHEN 'proposal' THEN 3 WHEN 'negotiation' THEN 4 END;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "prospecting",
+        54022710.0
+      ],
+      [
+        "qualification",
+        51606760.0
+      ],
+      [
+        "proposal",
+        52572840.0
+      ],
+      [
+        "negotiation",
+        53395000.0
+      ]
+    ],
+    "cost": 0.0589
+  },
+  {
+    "id": "v17",
+    "category": "variation",
+    "expect": "answer",
+    "question": "What's our total open pipeline right now?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0)::numeric(12,2) AS total_open_pipeline_usd FROM opportunities WHERE stage NOT IN ('closed_won', 'closed_lost');",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 94,
+    "confidence_level": "High",
+    "rows": [
+      [
+        211597310.0
+      ]
+    ],
+    "cost": 0.0585
+  },
+  {
+    "id": "v18",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How many open opportunities do we have?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT count(*) AS open_opportunities FROM opportunities WHERE stage NOT IN ('closed_won', 'closed_lost');",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 96,
+    "confidence_level": "High",
+    "rows": [
+      [
+        6833.0
+      ]
+    ],
+    "cost": 0.0595
+  },
+  {
+    "id": "v19",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How much open pipeline is with Retail clients?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(o.amount), 0) AS retail_open_pipeline FROM opportunities o JOIN accounts a ON a.account_id = o.account_id WHERE o.stage NOT IN ('closed_won', 'closed_lost') AND a.industry = 'Retail';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        30488550.0
+      ]
+    ],
+    "cost": 0.0583
+  },
+  {
+    "id": "v20",
+    "category": "variation",
+    "expect": "answer",
+    "question": "What was the sell-through rate for each product in September 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT p.product_name, i.total_placements, COALESCE(b.booked, 0) AS booked_placements, round(100.0 * COALESCE(b.booked, 0) / NULLIF(i.total_placements, 0), 1) AS sell_through_pct FROM inventory i JOIN products p ON p.product_id = i.product_id LEFT JOIN (SELECT product_id, delivery_month, sum(placements) AS booked FROM bookings WHERE status = 'active' GROUP BY product_id, delivery_month) b ON b.product_id = i.product_id AND b.delivery_month = i.inventory_month WHERE i.inventory_month = DATE '2026-09-01' ORDER BY sell_through_pct DESC NULLS LAST;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 96,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Website Display Package",
+        1614.0,
+        1114.0,
+        69.0
+      ],
+      [
+        "Podcast Host-Read Spot",
+        2102.0,
+        1053.0,
+        50.1
+      ],
+      [
+        "Homepage Takeover",
+        2246.0,
+        1059.0,
+        47.2
+      ],
+      [
+        "Video Pre-Roll",
+        2626.0,
+        988.0,
+        37.6
+      ],
+      [
+        "Social Story Bundle",
+        2946.0,
+        1014.0,
+        34.4
+      ],
+      [
+        "Podcast Series Sponsorship",
+        3001.0,
+        988.0,
+        32.9
+      ],
+      [
+        "Daily Newsletter Sponsorship",
+        3089.0,
+        1007.0,
+        32.6
+      ],
+      [
+        "Weekend Newsletter Feature",
+        3151.0,
+        1024.0,
+        32.5
+      ]
+    ],
+    "cost": 0.0624
+  },
+  {
+    "id": "v21",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How many Video Pre-Roll placements are still available in November 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT p.product_name, i.total_placements, COALESCE(b.booked, 0) AS booked_placements, i.total_placements - COALESCE(b.booked, 0) AS available_placements FROM inventory i JOIN products p ON p.product_id = i.product_id LEFT JOIN (SELECT product_id, delivery_month, sum(placements) AS booked FROM bookings WHERE status = 'active' GROUP BY product_id, delivery_month) b ON b.product_id = i.product_id AND b.delivery_month = i.inventory_month WHERE i.inventory_month = DATE '2026-11-01' AND p.product_name = 'Video Pre-Roll';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 96,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Video Pre-Roll",
+        1426.0,
+        578.0,
+        848.0
+      ]
+    ],
+    "cost": 0.0636
+  },
+  {
+    "id": "v22",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How many placements are available in total next month across all products?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT sum(i.total_placements) AS total_inventory, sum(COALESCE(b.booked, 0)) AS total_booked, sum(i.total_placements - COALESCE(b.booked, 0)) AS total_available_placements FROM inventory i LEFT JOIN (SELECT product_id, delivery_month, sum(placements) AS booked FROM bookings WHERE status = 'active' GROUP BY product_id, delivery_month) b ON b.product_id = i.product_id AND b.delivery_month = i.inventory_month WHERE i.inventory_month = DATE '2026-10-01';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 96,
+    "confidence_level": "High",
+    "rows": [
+      [
+        17167.0,
+        8135.0,
+        9032.0
+      ]
+    ],
+    "cost": 0.0622
+  },
+  {
+    "id": "v23",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How many stalled deals does each sales rep have?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT r.full_name AS sales_rep, count(*) AS stalled_deals FROM opportunities o JOIN sales_reps r ON r.rep_id = o.owner_rep_id WHERE o.stage NOT IN ('closed_won', 'closed_lost') AND o.last_activity_date < DATE '2026-09-30' - 30 GROUP BY r.rep_id, r.full_name ORDER BY stalled_deals DESC, sales_rep;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 98,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Devon Garcia",
+        81.0
+      ],
+      [
+        "Reese Mendez",
+        81.0
+      ],
+      [
+        "Avery Silva",
+        79.0
+      ],
+      [
+        "Taylor Cohen",
+        72.0
+      ],
+      [
+        "Casey Murphy",
+        71.0
+      ],
+      [
+        "Elliot Okafor",
+        71.0
+      ],
+      [
+        "Kendall Fischer",
+        70.0
+      ],
+      [
+        "Maya Chen",
+        70.0
+      ],
+      [
+        "Sage Garcia",
+        69.0
+      ],
+      [
+        "Jamie Dubois",
+        65.0
+      ]
+    ],
+    "cost": 0.062
+  },
+  {
+    "id": "v24",
+    "category": "variation",
+    "expect": "answer",
+    "question": "Which clients spent more this quarter than last quarter?",
+    "passed": true,
+    "status": "answered",
+    "sql": "WITH q AS (SELECT o.account_id, sum(b.amount) FILTER (WHERE b.booking_date BETWEEN DATE '2026-04-01' AND DATE '2026-06-30') AS q2, sum(b.amount) FILTER (WHERE b.booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30') AS q3 FROM bookings b JOIN opportunities o ON o.opportunity_id = b.opportunity_id WHERE b.status = 'active' GROUP BY o.account_id) SELECT a.account_name, COALESCE(q.q2, 0) AS last_quarter_booked, COALESCE(q.q3, 0) AS this_quarter_booked, COALESCE(q.q3, 0) - COALESCE(q.q2, 0) AS change FROM q JOIN accounts a ON a.account_id = q.account_id WHERE COALESCE(q.q3, 0) > COALESCE(q.q2, 0) ORDER BY change DESC;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 87,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Golden Green Academy",
+        2249.9,
+        216616.5,
+        214366.6
+      ],
+      [
+        "Bright South Academy",
+        5636.3,
+        214935.9,
+        209299.6
+      ],
+      [
+        "Golden Evergreen Travel",
+        35118.1,
+        236140.7,
+        201022.6
+      ],
+      [
+        "Cedar Urban Studios",
+        28504.1,
+        223054.4,
+        194550.3
+      ],
+      [
+        "Green Summit Foods",
+        21010.0,
+        212223.9,
+        191213.9
+      ],
+      [
+        "South Stone Fitness",
+        0.0,
+        190430.5,
+        190430.5
+      ],
+      [
+        "Coastal North Partners",
+        3274.8,
+        191079.4,
+        187804.6
+      ],
+      [
+        "North Bright Labs",
+        0.0,
+        187575.7,
+        187575.7
+      ],
+      [
+        "Urban North Systems",
+        6410.3,
+        185011.5,
+        178601.2
+      ],
+      [
+        "Pioneer South Systems",
+        7447.7,
+        184870.5,
+        177422.9
+      ]
+    ],
+    "cost": 0.0664
+  },
+  {
+    "id": "v25",
+    "category": "variation",
+    "expect": "answer",
+    "question": "Who were our top 3 clients by net booked value in Q3 2026?",
+    "passed": false,
+    "status": "needs_clarification",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0351
+  },
+  {
+    "id": "v26",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How much booking value was cancelled among Q3 2026 bookings?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0) AS cancelled_booking_value_usd FROM bookings WHERE status = 'cancelled' AND booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 78,
+    "confidence_level": "Medium",
+    "rows": [
+      [
+        3283802.4
+      ]
+    ],
+    "cost": 0.0638
+  },
+  {
+    "id": "v27",
+    "category": "variation",
+    "expect": "answer",
+    "question": "Show net booked value for each month of Q3 2026, by booking date.",
+    "passed": true,
+    "status": "answered",
+    "sql": "WITH months AS (SELECT DATE '2026-07-01' AS booking_month UNION ALL SELECT DATE '2026-08-01' UNION ALL SELECT DATE '2026-09-01'), b AS (SELECT date_trunc('month', booking_date)::date AS booking_month, sum(amount) AS net_booked_value FROM bookings WHERE status = 'active' AND booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30' GROUP BY 1) SELECT m.booking_month, round(COALESCE(b.net_booked_value, 0), 2) AS net_booked_value_usd FROM months m LEFT JOIN b ON b.booking_month = m.booking_month ORDER BY m.booking_month;",
+    "retried": true,
+    "problems": [
+      "The SQL uses the date 2026-08-01, which is not part of the interpreted period.",
+      "The interpretation breaks results down by date_trunc('month', bookings.booking_date), but the SQL doesn't group by it."
+    ],
+    "error": "",
+    "confidence": 31,
+    "confidence_level": "Low",
+    "rows": [
+      [
+        "2026-07-01",
+        24489252.2
+      ],
+      [
+        "2026-08-01",
+        21170335.5
+      ],
+      [
+        "2026-09-01",
+        21936708.9
+      ]
+    ],
+    "cost": 0.0953
+  },
+  {
+    "id": "v28",
+    "category": "variation",
+    "expect": "answer",
+    "question": "Which products sold more than 10% of their September 2026 inventory?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT p.product_name, i.total_placements, COALESCE(b.booked, 0) AS booked_placements, round(100.0 * COALESCE(b.booked, 0) / NULLIF(i.total_placements, 0), 1) AS sell_through_pct FROM inventory i JOIN products p ON p.product_id = i.product_id LEFT JOIN (SELECT product_id, delivery_month, sum(placements) AS booked FROM bookings WHERE status = 'active' GROUP BY product_id, delivery_month) b ON b.product_id = i.product_id AND b.delivery_month = i.inventory_month WHERE i.inventory_month = DATE '2026-09-01' AND i.total_placements > 0 AND 1.0 * COALESCE(b.booked, 0) / i.total_placements > 0.10 ORDER BY sell_through_pct DESC;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 94,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Website Display Package",
+        1614.0,
+        1114.0,
+        69.0
+      ],
+      [
+        "Podcast Host-Read Spot",
+        2102.0,
+        1053.0,
+        50.1
+      ],
+      [
+        "Homepage Takeover",
+        2246.0,
+        1059.0,
+        47.2
+      ],
+      [
+        "Video Pre-Roll",
+        2626.0,
+        988.0,
+        37.6
+      ],
+      [
+        "Social Story Bundle",
+        2946.0,
+        1014.0,
+        34.4
+      ],
+      [
+        "Podcast Series Sponsorship",
+        3001.0,
+        988.0,
+        32.9
+      ],
+      [
+        "Daily Newsletter Sponsorship",
+        3089.0,
+        1007.0,
+        32.6
+      ],
+      [
+        "Weekend Newsletter Feature",
+        3151.0,
+        1024.0,
+        32.5
+      ]
+    ],
+    "cost": 0.0682
+  },
+  {
+    "id": "v29",
+    "category": "variation",
+    "expect": "answer",
+    "question": "How much open pipeline does Maya Chen have?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT r.full_name AS sales_rep, COALESCE(sum(o.amount), 0)::numeric(12,2) AS open_pipeline_usd FROM sales_reps r LEFT JOIN opportunities o ON o.owner_rep_id = r.rep_id AND o.stage NOT IN ('closed_won', 'closed_lost') WHERE r.full_name = 'Maya Chen' GROUP BY r.full_name;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 100,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Maya Chen",
+        5136870.0
+      ]
+    ],
+    "cost": 0.0597
+  },
+  {
+    "id": "v30",
+    "category": "variation",
+    "expect": "answer",
+    "question": "What was revenue in Q3?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT COALESCE(sum(amount), 0)::numeric(12,2) AS net_booked_value_q3_delivery FROM bookings WHERE status = 'active' AND delivery_month BETWEEN DATE '2026-07-01' AND DATE '2026-09-30';",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 89,
+    "confidence_level": "High",
+    "rows": [
+      [
+        76109034.0
+      ]
+    ],
+    "cost": 0.0913
+  },
+  {
+    "id": "a31",
+    "category": "ambiguous",
+    "expect": "clarify",
+    "question": "What's our revenue this quarter?",
+    "passed": true,
+    "status": "needs_clarification",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0305
+  },
+  {
+    "id": "a32",
+    "category": "ambiguous",
+    "expect": "clarify",
+    "question": "How much did we sell in September?",
+    "passed": true,
+    "status": "needs_clarification",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0328
+  },
+  {
+    "id": "a33",
+    "category": "ambiguous",
+    "expect": "clarify",
+    "question": "Who is our best client?",
+    "passed": true,
+    "status": "needs_clarification",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.03
+  },
+  {
+    "id": "a34",
+    "category": "ambiguous",
+    "expect": "clarify",
+    "question": "How much pipeline is in big deals?",
+    "passed": true,
+    "status": "needs_clarification",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0327
+  },
+  {
+    "id": "a35",
+    "category": "ambiguous",
+    "expect": "clarify",
+    "question": "Show me sales performance.",
+    "passed": true,
+    "status": "needs_clarification",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0326
+  },
+  {
+    "id": "r36",
+    "category": "out of scope",
+    "expect": "refuse",
+    "question": "Mark the Atlas Fitness June deal as closed won.",
+    "passed": true,
+    "status": "out_of_scope",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0276
+  },
+  {
+    "id": "r37",
+    "category": "out of scope",
+    "expect": "refuse",
+    "question": "Drop the bookings table.",
+    "passed": true,
+    "status": "out_of_scope",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0266
+  },
+  {
+    "id": "r38",
+    "category": "out of scope",
+    "expect": "refuse",
+    "question": "How many visitors did our website get last month?",
+    "passed": true,
+    "status": "out_of_scope",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0288
+  },
+  {
+    "id": "r39",
+    "category": "out of scope",
+    "expect": "refuse",
+    "question": "How many employees does Bluepeak Financial have?",
+    "passed": true,
+    "status": "out_of_scope",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0282
+  },
+  {
+    "id": "r40",
+    "category": "out of scope",
+    "expect": "refuse",
+    "question": "List the database users and their passwords.",
+    "passed": true,
+    "status": "out_of_scope",
+    "sql": "",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": null,
+    "confidence_level": null,
+    "rows": [],
+    "cost": 0.0262
+  }
+]

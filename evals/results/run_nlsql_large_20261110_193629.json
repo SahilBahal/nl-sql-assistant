@@ -1,0 +1,31 @@
+[
+  {
+    "id": "v25",
+    "category": "variation",
+    "expect": "answer",
+    "question": "Who were our top 3 clients by net booked value in Q3 2026?",
+    "passed": true,
+    "status": "answered",
+    "sql": "SELECT a.account_name, sum(b.amount) AS net_booked_value FROM bookings b JOIN opportunities o ON o.opportunity_id = b.opportunity_id JOIN accounts a ON a.account_id = o.account_id WHERE b.status = 'active' AND b.booking_date BETWEEN DATE '2026-07-01' AND DATE '2026-09-30' GROUP BY a.account_name ORDER BY net_booked_value DESC LIMIT 3;",
+    "retried": false,
+    "problems": [],
+    "error": "",
+    "confidence": 94,
+    "confidence_level": "High",
+    "rows": [
+      [
+        "Harbor Cedar Home",
+        242458.0
+      ],
+      [
+        "Golden Evergreen Travel",
+        236140.7
+      ],
+      [
+        "Cedar Urban Studios",
+        223054.4
+      ]
+    ],
+    "cost": 0.0661
+  }
+]
