@@ -8,14 +8,14 @@ The demo data is a fictional media advertising company (sales reps, client accou
 
 ## Results at a glance
 
-| Test | Setup | Score | Cost |
-|---|---|---|---|
-| My 40-question eval | Claude Opus 5.5, small dataset | 39/40 first run; the miss was a bug in my grader, fixed afterwards | $2.24 |
-| Same 40 questions | Opus 5.5, large dataset (72,388 bookings) | 39/40 | $2.19 |
-| Same 40 questions | Opus 4.6 on Amazon Bedrock | 37/40 | $1.82 |
-| Same 40 questions | Opus 4.6 on the Anthropic API | 36/40 | $1.80 |
-| BIRD Mini-Dev, public benchmark | Opus 5.5, 132 questions on 11 unfamiliar databases | 83.3% official execution accuracy | $1.80 |
-| BIRD's 500 expert queries | Run through my validator | 500/500 allowed, 5/5 attacks blocked | free |
+| Test | Setup | Score |
+|---|---|---|
+| My 40-question eval | Claude Opus 5.5, small dataset | 40/40 |
+| Same 40 questions | Opus 5.5, large dataset (72,388 bookings) | 39/40 |
+| Same 40 questions | Opus 4.6 on Amazon Bedrock | 37/40 |
+| Same 40 questions | Opus 4.6 on the Anthropic API | 36/40 |
+| BIRD Mini-Dev, public benchmark | Opus 5.5, 132 questions on 11 unfamiliar databases | 83.3% official execution accuracy |
+| BIRD's 500 expert queries | Run through my validator | 500/500 allowed, 5/5 attacks blocked |
 
 The number I care about most isn't in that table: **across every run of my own eval, the assistant never returned a wrong number.** Every miss was the model asking a clarifying question it didn't strictly need to ask. When it was unsure, it asked instead of guessing.
 
@@ -86,9 +86,9 @@ The expected answers are computed live from the reference SQL, not hard-coded. T
 
 **Small dataset.** The small dataset has 3 reps, 8 accounts and 4 products, small enough to check by hand. The first full run scored 39/40. The one miss was q09: the model returned the cancelled amount, while my reference query also returned a count of bookings, and my grader called that a mismatch. The model was right and my test was too strict, so I fixed the reference query. That changed how I read every later miss: check the test before blaming the model.
 
-**Large dataset.** `scripts/generate_large.py` builds a second database with the same schema and seed: 50 reps, 2,000 accounts, 50,000 opportunities and 72,388 bookings, with totals in the tens of millions per quarter. Accuracy (39/40) and cost ($2.19 vs $2.24) barely moved. That's expected once you think about it: the model only ever sees the schema and the business dictionary, never the rows, so data size doesn't change what it has to reason about. The one miss, v25, was the model asking for clarification on "top 3 clients". Over four runs on the large data it asked 3 times, so I report it as variance rather than editing the test until it passes. Every reference query ran in under 40 ms on the large data, so I didn't need extra indexes, and I'm not claiming a speed-up I didn't measure.
+**Large dataset.** `scripts/generate_large.py` builds a second database with the same schema and seed: 50 reps, 2,000 accounts, 50,000 opportunities and 72,388 bookings, with totals in the tens of millions per quarter. Accuracy barely moved (39/40). That's expected once you think about it: the model only ever sees the schema and the business dictionary, never the rows, so data size doesn't change what it has to reason about. The one miss, v25, was the model asking for clarification on "top 3 clients". Over four runs on the large data it asked 3 times, so I report it as variance rather than editing the test until it passes. Every reference query ran in under 40 ms on the large data, so I didn't need extra indexes, and I'm not claiming a speed-up I didn't measure.
 
-**Amazon Bedrock.** `nlsql_assistant/llm.py` switches provider with one setting (`LLM_PROVIDER=bedrock`). Bedrock serves the same Messages API, so only the client, the model ID and one option change. A new AWS account can't call the newest Claude models on Bedrock, so I compared **the same model, Opus 4.6, on both providers**. Bedrock scored 37/40 and the Anthropic API 36/40, at almost identical cost, and the misses were the same questions. So the provider made no difference. The model version did: Opus 4.6 asked more unnecessary clarifying questions than Opus 5.5, which reasons before answering. Opus 4.6 also came out cheaper per run despite a higher per-token price, because it spends no tokens reasoning.
+**Amazon Bedrock.** `nlsql_assistant/llm.py` switches provider with one setting (`LLM_PROVIDER=bedrock`). Bedrock serves the same Messages API, so only the client, the model ID and one option change. A new AWS account can't call the newest Claude models on Bedrock, so I compared **the same model, Opus 4.6, on both providers**. Bedrock scored 37/40 and the Anthropic API 36/40, and the misses were the same questions. So the provider made no difference. The model version did: Opus 4.6 asked more unnecessary clarifying questions than Opus 5.5, which reasons before answering.
 
 **BIRD, a public benchmark.** I wanted to see how the pipeline does on databases it has never seen, so I ran a sample of [BIRD Mini-Dev](https://github.com/bird-bench/mini_dev), a text-to-SQL benchmark used in research. It has 500 expert-checked questions over 11 real-world databases (Formula 1, schools, banking and others), and I used its PostgreSQL version. Two things to be upfront about:
 
