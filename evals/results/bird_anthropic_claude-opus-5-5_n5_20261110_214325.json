@@ -1,0 +1,72 @@
+[
+  {
+    "question_id": 486,
+    "db_id": "card_games",
+    "difficulty": "moderate",
+    "question": "What is the percentage of the cards with a converted mana cost of 7 in the set Coldsnap?",
+    "correct": true,
+    "cost": 0.0202,
+    "retried": false,
+    "input_tokens": 4420,
+    "output_tokens": 126,
+    "sql": "SELECT CAST(SUM(CASE WHEN c.convertedmanacost = 7 THEN 1 ELSE 0 END) AS DOUBLE PRECISION) * 100 / COUNT(c.id) FROM cards c JOIN sets s ON s.code = c.setcode WHERE s.name = 'Coldsnap'",
+    "problem": "",
+    "status": "ran"
+  },
+  {
+    "question_id": 1506,
+    "db_id": "debit_card_specializing",
+    "difficulty": "moderate",
+    "question": "Please list the product descriptions of the transactions taken place in the gas stations in the Czech Republic.",
+    "correct": true,
+    "cost": 0.004868,
+    "retried": false,
+    "input_tokens": 767,
+    "output_tokens": 90,
+    "sql": "SELECT DISTINCT p.description FROM transactions_1k t JOIN gasstations g ON t.gasstationid = g.gasstationid JOIN products p ON t.productid = p.productid WHERE g.country = 'CZE'",
+    "problem": "",
+    "status": "ran"
+  },
+  {
+    "question_id": 231,
+    "db_id": "toxicology",
+    "difficulty": "challenging",
+    "question": "Which bond type accounted for the majority of the bonds found in molecule TR010 and state whether or not this molecule is carcinogenic?",
+    "correct": false,
+    "cost": 0.006176,
+    "retried": false,
+    "input_tokens": 959,
+    "output_tokens": 117,
+    "sql": "SELECT b.bond_type, m.label FROM bond b JOIN molecule m ON b.molecule_id = m.molecule_id WHERE b.molecule_id = 'TR010' GROUP BY b.bond_type, m.label ORDER BY COUNT(b.bond_id) DESC LIMIT 1",
+    "problem": "",
+    "status": "ran"
+  },
+  {
+    "question_id": 912,
+    "db_id": "formula_1",
+    "difficulty": "simple",
+    "question": "What's the reference name of Marina Bay Street Circuit?",
+    "correct": true,
+    "cost": 0.010931999999999999,
+    "retried": false,
+    "input_tokens": 2508,
+    "output_tokens": 45,
+    "sql": "SELECT circuitref FROM circuits WHERE name = 'Marina Bay Street Circuit'",
+    "problem": "",
+    "status": "ran"
+  },
+  {
+    "question_id": 1404,
+    "db_id": "student_club",
+    "difficulty": "moderate",
+    "question": "Identify the type of expenses and their total value approved for 'October Meeting' event.",
+    "correct": true,
+    "cost": 0.018872,
+    "retried": false,
+    "input_tokens": 1943,
+    "output_tokens": 555,
+    "sql": "SELECT e.type, SUM(x.cost) AS total_value FROM event e JOIN budget b ON e.event_id = b.link_to_event JOIN expense x ON b.budget_id = x.link_to_budget WHERE e.event_name = 'October Meeting' GROUP BY e.type",
+    "problem": "",
+    "status": "ran"
+  }
+]
